@@ -3,7 +3,9 @@ falcon-cors
 
 About
 ------
-This is a CORS algorithm and a falcon middleware for CORS
+This is a CORS algorithm and a falcon middleware for CORS.
+
+Interface Documentation:  https://falcon-cors.readthedocs.org/en/develop/falcon_cors.html
 
 Usage
 ------
