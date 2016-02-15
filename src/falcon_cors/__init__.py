@@ -199,6 +199,7 @@ class CORS(object):
 
     @property
     def middleware(self):
+        """A property which returns a CORSMiddleware instance"""
         return CORSMiddleware(self)
 
 
