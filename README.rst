@@ -1,11 +1,10 @@
-```python
+.. code-block:: python
 
-import falcon
-from falcon_cors import CORS
+    import falcon
+    from falcon_cors import CORS
 
-cors = CORS()
+    cors = CORS()
 
-api = falcon.API(middleware=[cors.middleware])
+    api = falcon.API(middleware=[cors.middleware])
 
-```
 
