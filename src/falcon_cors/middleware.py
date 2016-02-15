@@ -1,7 +1,5 @@
 class CORSMiddleware:
     """This is the middleware that applies a CORS object to requests.
-    You can use the cors kwarg to `falcon.API` instead of creating
-    this yourself.
 
     Args:
         cors (CORS, required): An instance of :py:class:`~falcon.cors.CORS`.
