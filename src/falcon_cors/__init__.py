@@ -5,6 +5,8 @@ import re
 
 from falcon import HTTP_METHODS
 
+from .middleware import CORSMiddleware
+
 
 class CORS(object):
     """
@@ -194,6 +196,11 @@ class CORS(object):
         for key in keys:
             if settings_dict[key] is not None:
                 settings_dict[key] = re.compile(settings_dict[key])
+
+    @property
+    def middleware(self):
+        return CORSMiddleware(self)
+
 
     def process(self, req, resp, resource):
         # Comments in this section will refer to sections of the W3C
@@ -408,22 +415,3 @@ class CORS(object):
         resp.append_header('vary', 'origin')
 
 
-class CORSMiddleware:
-    """This is the middleware that applies a CORS object to requests.
-    You can use the cors kwarg to `falcon.API` instead of creating
-    this yourself.
-
-    Args:
-        cors (CORS, required): An instance of :py:class:`~falcon.cors.CORS`.
-        default_enabled (bool, optional): Whether CORS processing should
-            take place for every resource.  Default ``True``.
-    """
-    def __init__(self, cors, default_enabled=True):
-        self.cors = cors
-        self.default_enabled = default_enabled
-
-    def process_resource(self, req, resp, resource, params):
-        if not getattr(resource, 'cors_enabled', self.default_enabled):
-            return
-        cors = getattr(resource, 'cors', self.cors)
-        cors.process(req, resp, resource)

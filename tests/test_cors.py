@@ -5,7 +5,7 @@ import mock
 from nose.tools import raises
 
 import falcon
-from falcon.cors import CORS
+from falcon_cors import CORS
 import falcon.testing as testing
 from falcon.testing.resource import TestResource
 
@@ -23,35 +23,9 @@ class TestCors(testing.TestBase):
         return str(uuid.uuid4())
 
     def simulate_cors_api(self, cors, route='/'):
-        self.api = falcon.API(cors=cors)
+        self.api = falcon.API(middleware=[cors.middleware])
         self.api.add_route(route, self.resource)
 
-    @raises(ValueError)
-    def test_api_cors_instance(self):
-        not_a_cors = {}
-        falcon.API(cors=not_a_cors)
-
-    def test_api_insert_middleware(self):
-        cors = CORS()
-
-        class FakeMiddleware:
-            def process_resource(self, req, resp, resource):
-                pass
-
-        fake_middleware = FakeMiddleware()
-        api = falcon.API(middleware=[fake_middleware], cors=cors)
-        self.assertEqual(len(api._middleware), 2)
-        self.assertEqual(api._middleware[0][1].__self__.cors, cors)
-
-        api = falcon.API(middleware=fake_middleware, cors=cors)
-        self.assertEqual(len(api._middleware), 2)
-        self.assertEqual(api._middleware[0][1].__self__.cors, cors)
-
-    def test_api_no_middleware(self):
-        cors = CORS()
-        api = falcon.API(cors=cors)
-        self.assertEqual(len(api._middleware), 1)
-        self.assertEqual(api._middleware[0][1].__self__.cors, cors)
 
     @raises(ValueError)
     def test_init_settings(self):
