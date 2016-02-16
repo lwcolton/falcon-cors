@@ -40,6 +40,16 @@ Override CORS for a specific resource
 
     api.add_route("/public", MyPublicResource())
 
+Turn CORS off for a specific resource
+--------
+.. code-block:: python
+
+    class MyResource:
+        cors_enabled = False
 
 
-
+Tests and Contributing
+-------
+You can run tests using tox.  
+If you want to contribute just submit a PR and please make sure you have created some tests for your feature.
+I will review features and run the tests with tox before releasing them.
