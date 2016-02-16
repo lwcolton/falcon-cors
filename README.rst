@@ -7,6 +7,8 @@ This is a CORS algorithm and a falcon middleware for CORS.
 
 Interface Documentation:  https://falcon-cors.readthedocs.org/en/master/falcon_cors.html
 
+pypi: https://pypi.python.org/pypi/falcon-cors
+
 Install
 -------
 
