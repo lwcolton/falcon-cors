@@ -18,11 +18,9 @@ Usage
 
     api = falcon.API(middleware=[cors.middleware])
 
-Advanced
---------
 
 Override CORS for a specific resource
-~~~~~~~~
+--------
 .. code-block:: python
 
     import falcon
