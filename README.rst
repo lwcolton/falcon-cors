@@ -18,4 +18,30 @@ Usage
 
     api = falcon.API(middleware=[cors.middleware])
 
+Advanced
+--------
+
+Override CORS for a specific resource
+~~~~~~~~
+.. code-block:: python
+
+    import falcon
+    from falcon_cors import CORS
+
+    cors = CORS(allow_origins_list=['test.com'])
+
+    api = falcon.API(middleware=[cors.middleware])
+
+    public_cors = CORS(allow_all_origins=True)
+
+    class MyPublicResource:
+        cors = public_cors
+
+        def post(self, req, resp):
+            resp.body = "Everone can post to this resource"
+
+    api.add_route("/public", MyPublicResource())
+
+
+
 
