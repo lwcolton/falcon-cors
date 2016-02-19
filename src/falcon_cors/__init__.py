@@ -6,6 +6,7 @@ import re
 from falcon import HTTP_METHODS
 
 from .middleware import CORSMiddleware
+from .log import get_default_logger
 
 
 class CORS(object):
@@ -20,6 +21,10 @@ class CORS(object):
     an instance of this class.
 
     Args:
+        logger(:py:meth:`logging.Logger`, optional):
+            Specifies the logger to use.  A basic logger and StreamHandler
+            will be configure for you if none is provided.
+   
         allow_all_origins(bool, optional): Specifies whether CORS
             should allow requests from all origins.  Default is ``False``.
 
@@ -120,6 +125,7 @@ class CORS(object):
     """
     def __init__(self, **cors_config):
         default_cors_config = {
+            'logger': get_default_logger(),
             'allow_all_origins': False,
             'allow_origins_list': [],
             'allow_origins_regex': None,
@@ -132,9 +138,9 @@ class CORS(object):
             'allow_credentials_all_origins': False,
             'allow_credentials_origins_list': [],
             'allow_credentials_origins_regex': None,
-            'max_age': None,
-        }
+            'max_age': None
 
+        }
         for cors_setting, setting_value in default_cors_config.items():
             cors_config.setdefault(cors_setting, setting_value)
 
@@ -143,6 +149,8 @@ class CORS(object):
         if unknown_settings:
             raise ValueError(
                 'Unknown CORS settings: {0}'.format(unknown_settings))
+
+        self.logger = cors_config["logger"]
 
         unknown_methods = list(set(
             cors_config['allow_methods_list']) - set(HTTP_METHODS))
@@ -177,6 +185,9 @@ class CORS(object):
         ]:
             if cors_config[credentials_key]:
                 self.supports_credentials = True
+        self.logger.debug("supports_credentials: {0}".format(
+            self.supports_credentials
+        )
 
         # Detect if we need to send 'Vary: Origin' header
         # This needs to be set if any decisions about which headers to send
@@ -189,6 +200,10 @@ class CORS(object):
             ]:
                 if cors_config[vary_origin_config_key]:
                     self.origins_vary = True
+
+        self.logger.debug("origins_vary {0}".format(
+            self.origins_vary
+        )
 
         self._cors_config = cors_config
 
@@ -225,6 +240,7 @@ class CORS(object):
         # 6.1.1
         # 6.2.1
         if not origin:
+            self.logger.debug("Aborting response due to no origin header")
             return
 
         # 6.1.2
@@ -232,10 +248,12 @@ class CORS(object):
         # 6.2.2
         # 6.2.7 (Access-Control-Allow-Origin)
         if not self._process_origin(req, resp, origin):
+            self.logger.info("Aborting response due to origin not allowed")
             return
 
         # Basic or actual request
         if req.method != 'OPTIONS':
+            self.logger.debug("Processing basic or actual request")
             # 6.1.3 (Access-Control-Allow-Credentials)
             self._process_credentials(req, resp, origin)
 
@@ -243,9 +261,13 @@ class CORS(object):
             self._process_expose_headers(req, resp)
         # Preflight request
         else:
+            self.logger.debug("Processing preflight request")
             request_method = req.get_header('access-control-request-method')
             # 6.2.3
             if not request_method:
+                self.logger.info(
+                    "Aborting response due to no access-control-request-method header"
+                )
                 return
 
             # 6.2.4
@@ -254,11 +276,13 @@ class CORS(object):
             # 6.2.5
             # 6.2.9
             if not self._process_methods(req, resp, resource):
+                self.logger.info("Aborting response due to unallowed method")
                 return
 
             # 6.2.6
             # 6.2.10
             if not self._process_allow_headers(req, resp, requested_header_list):
+                self.logger.info("Aborting response due to unallowed headers")
                 return
 
             # 6.2.7 (Access-Control-Allow-Credentials)
