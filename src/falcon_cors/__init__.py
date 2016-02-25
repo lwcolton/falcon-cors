@@ -185,8 +185,10 @@ class CORS(object):
         ]:
             if cors_config[credentials_key]:
                 self.supports_credentials = True
-        self.logger.debug("supports_credentials: {0}".format(
-            self.supports_credentials
+        self.logger.debug(
+            "supports_credentials: {0}".format(
+                self.supports_credentials
+            )
         )
 
         # Detect if we need to send 'Vary: Origin' header
@@ -201,8 +203,10 @@ class CORS(object):
                 if cors_config[vary_origin_config_key]:
                     self.origins_vary = True
 
-        self.logger.debug("origins_vary {0}".format(
-            self.origins_vary
+        self.logger.debug(
+            "origins_vary {0}".format(
+                self.origins_vary
+            )
         )
 
         self._cors_config = cors_config
