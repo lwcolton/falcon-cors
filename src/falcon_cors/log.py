@@ -1,6 +1,6 @@
 import logging
 
-def get_default_logger():
+def get_default_logger(level=None):
     logger = logging.getLogger("falcon_cors")
     logger.setLevel(logging.INFO)
     logger.propogate = False

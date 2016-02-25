@@ -126,6 +126,7 @@ class CORS(object):
     def __init__(self, **cors_config):
         default_cors_config = {
             'logger': get_default_logger(),
+            'log_level':None,
             'allow_all_origins': False,
             'allow_origins_list': [],
             'allow_origins_regex': None,
@@ -151,6 +152,9 @@ class CORS(object):
                 'Unknown CORS settings: {0}'.format(unknown_settings))
 
         self.logger = cors_config["logger"]
+        if log_level is not None:
+            level = logging._nameToLevel[log_level]
+            self.logger.setLevel(level)
 
         unknown_methods = list(set(
             cors_config['allow_methods_list']) - set(HTTP_METHODS))
