@@ -6,7 +6,6 @@ def get_default_logger():
     logger.propogate = False
     if not logger.handlers:
         handler = logging.StreamHandler()
-        handler.setLevel(logging.INFO)
         logger.addHandler(handler)
     return logger
 
