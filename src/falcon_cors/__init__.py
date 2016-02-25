@@ -1,6 +1,7 @@
 """
 This module implements the configuration for handling CORS requests.
 """
+import logging
 import re
 
 from falcon import HTTP_METHODS
