@@ -152,8 +152,8 @@ class CORS(object):
                 'Unknown CORS settings: {0}'.format(unknown_settings))
 
         self.logger = cors_config["logger"]
-        if log_level is not None:
-            level = logging._nameToLevel[log_level]
+        if cors_config["log_level"] is not None:
+            level = logging._nameToLevel[cors_config["log_level"]]
             self.logger.setLevel(level)
 
         unknown_methods = list(set(
