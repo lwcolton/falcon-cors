@@ -23,7 +23,7 @@ Usage
     import falcon
     from falcon_cors import CORS
 
-    cors = CORS(allow_origins_list=['test.com'])
+    cors = CORS(allow_origins_list=['http://test.com:8080'])
 
     api = falcon.API(middleware=[cors.middleware])
 
@@ -35,7 +35,7 @@ Override CORS for a specific resource
     import falcon
     from falcon_cors import CORS
 
-    cors = CORS(allow_origins_list=['test.com'])
+    cors = CORS(allow_origins_list=['http://test.com:8080'])
 
     api = falcon.API(middleware=[cors.middleware])
 
