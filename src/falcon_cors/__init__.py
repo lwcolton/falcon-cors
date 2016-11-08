@@ -25,7 +25,7 @@ class CORS(object):
         logger(:py:meth:`logging.Logger`, optional):
             Specifies the logger to use.  A basic logger and StreamHandler
             will be configure for you if none is provided.
-   
+
         allow_all_origins(bool, optional): Specifies whether CORS
             should allow requests from all origins.  Default is ``False``.
 
@@ -426,7 +426,7 @@ class CORS(object):
         if raw_header is None:
             return []
         else:
-            return [requested_header.strip() for requested_header in raw_header.split(',')]
+            return filter(None, [requested_header.strip() for requested_header in raw_header.split(',')])
 
     def _get_requested_method(self, req):
         return req.get_header('access-control-request-method')
