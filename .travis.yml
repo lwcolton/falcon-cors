@@ -1,0 +1,8 @@
+sudo: false
+dist: trusty
+
+install:
+  - pip install tox
+
+script:
+  - tox
