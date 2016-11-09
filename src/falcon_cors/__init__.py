@@ -25,7 +25,7 @@ class CORS(object):
         logger(:py:meth:`logging.Logger`, optional):
             Specifies the logger to use.  A basic logger and StreamHandler
             will be configure for you if none is provided.
-   
+
         allow_all_origins(bool, optional): Specifies whether CORS
             should allow requests from all origins.  Default is ``False``.
 
@@ -422,11 +422,15 @@ class CORS(object):
             resp.set_header('access-control-max-age', self._cors_config['max_age'])
 
     def _get_requested_headers(self, req):
+        headers = []
         raw_header = req.get_header('access-control-request-headers')
         if raw_header is None:
-            return []
-        else:
-            return [requested_header.strip() for requested_header in raw_header.split(',')]
+            return headers
+        for requested_header in raw_header.split(','):
+            requested_header = requested_header.strip()
+            if requested_header:
+                headers.append(requested_header)
+        return headers
 
     def _get_requested_method(self, req):
         return req.get_header('access-control-request-method')
@@ -447,5 +451,3 @@ class CORS(object):
 
     def _set_vary_origin(self, resp):
         resp.append_header('vary', 'origin')
-
-
