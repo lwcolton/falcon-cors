@@ -1,3 +1,6 @@
+.. image:: https://travis-ci.org/lwcolton/falcon-cors.svg?branch=master
+    :target: https://travis-ci.org/lwcolton/falcon-cors
+
 falcon-cors
 ========
 
