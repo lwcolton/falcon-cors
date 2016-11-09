@@ -3,6 +3,7 @@ dist: trusty
 
 install:
   - pip install tox
+  - pip install file://`pwd`
 
 script:
   - tox
