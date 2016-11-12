@@ -7,8 +7,6 @@ if [ "$branch" != "master" ]; then
 fi
 git diff --exit-code
 
-tox
-
 current_version=`cat version`
 echo "Current version: $current_version"
 read -e -p "Enter new version: " new_version
