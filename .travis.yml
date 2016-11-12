@@ -1,8 +1,14 @@
 sudo: false
 dist: trusty
-
 install:
-  - pip install tox
-
+- pip install tox
 script:
-  - tox
+- tox
+deploy:
+  provider: pypi
+  user: lwcolton
+  password:
+    secure: ahvXhauCzunLla0GYeGjUqaHAU09W4OC1dlKdm+35gouJKsfA60722bNPPbQ9AK2i1GhEI0RarFDGx8oPzjIPEL9VSQBo2SJcNOBfxYcbrVWy24wdbOu1qBn6D35rzKh8O9RRsSrB5UhsHFbev502iU767FnhMVA1qnYH6Rm/6WoB99hytagCMNyhW5nDVGugZrW6Rdu8rMz73iMXnZ0FtxL7A4dyEyX4ExKjTPjsODownRlyygJjKosJan0SQCssdC4n/x3kzygqta7MnhyiEupZpXmbkJ2wCAqeSSRmW95KrwZoylNRhncVY2yFAxQY+sRbvoaeBKmW7S5q10eDl9Ri3m337GHGj4ENR6574VedcG09G1MS6k35nbdDKNSUEn/SS3dUuSQHfZ3iHbi3kX6xeKpY+MSFtbHYAxC6SYYjm8nbIwX/JjcDwRTt8FUuZ2dE/eflNQMfqurtfc9T9ltft3GrHA7wKHcbqz+hH6HtELpvUyta5oHhnPUr7aCq/3fCR+Frjz9dE0Ctcxmokfsm/NIyQtCfmCcHgOYx2kUia6tqPgZ3YONep39F2LlVuMCsFCQB9PEMfOdPCzRa8jOukM65SAigSVk7fuv4R6J5vJ8DgsN599x/YXanGB1goqeYma26IX/TNy+bx0TDIlpJGf6MvQL/ZmPG8fI1lk=
+  on:
+    branch: master
+    tags: true
