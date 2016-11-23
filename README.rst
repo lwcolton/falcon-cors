@@ -47,7 +47,7 @@ Override CORS for a specific resource
     class MyPublicResource:
         cors = public_cors
 
-        def post(self, req, resp):
+        def on_post(self, req, resp):
             resp.body = "Everone can post to this resource"
 
     api.add_route("/public", MyPublicResource())
