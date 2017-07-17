@@ -4,6 +4,11 @@ install:
 - pip install tox
 script:
 - tox
+before_deploy:
+  - git describe --tags > version
+  - git add version
+  - git commit
+  - git push origin --tags
 deploy:
   provider: pypi
   user: lwcolton
