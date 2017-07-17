@@ -251,6 +251,19 @@ class TestCors(testing.TestBase):
         )
         cors._set_allowed_headers.assert_called_once_with(fake_resp, ['test_header'])
 
+    def test_process_allow_headers_list_camelcase(self):
+        fake_req = mock.MagicMock()
+        fake_resp = mock.MagicMock()
+        cors = CORS(allow_headers_list=['Content-Type'])
+        cors._set_allowed_headers = mock.Mock()
+        self.assertEqual(
+            cors._process_allow_headers(fake_req, fake_resp, ['Content-Type']),
+            True
+        )
+        cors._set_allowed_headers.assert_called_once_with(
+            fake_resp, ['Content-Type']
+        )
+
     def test_process_allow_headers_regex(self):
         fake_req = mock.MagicMock()
         fake_resp = mock.MagicMock()

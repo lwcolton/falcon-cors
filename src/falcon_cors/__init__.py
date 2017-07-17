@@ -344,7 +344,7 @@ class CORS(object):
 
         approved_headers = []
         for header in requested_headers:
-            if header in self._cors_config['allow_headers_list']:
+            if header.lower() in self._cors_config['allow_headers_list']:
                 approved_headers.append(header)
             elif self._cors_config.get('allow_headers_regex'):
                 if self._cors_config['allow_headers_regex'].match(header):
