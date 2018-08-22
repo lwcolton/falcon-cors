@@ -10,7 +10,7 @@ class CORSMiddleware:
         self.cors = cors
         self.default_enabled = default_enabled
 
-    def process_resource(self, req, resp, resource, *args):
+    def process_response(self, req, resp, resource, *args, **kwargs):
         if not getattr(resource, 'cors_enabled', self.default_enabled):
             return
         cors = getattr(resource, 'cors', self.cors)

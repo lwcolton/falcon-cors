@@ -7,15 +7,15 @@ from nose.tools import raises
 import falcon
 from falcon_cors import CORS
 import falcon.testing as testing
-from falcon.testing.resource import TestResource
+from falcon.testing.test_case import TestCase
 
 
-class CORSResource(TestResource):
+class CORSResource(testing.TestResource):
     def on_options(self, req, resp, **kwargs):
         self.req, self.resp, self.kwargs = req, resp, kwargs
 
 
-class TestCors(testing.TestBase):
+class TestCors(TestCase):
     def get_header(self, name):
         return self.resource.resp._headers.get(name.lower(), None)
 
@@ -25,7 +25,6 @@ class TestCors(testing.TestBase):
     def simulate_cors_api(self, cors, route='/'):
         self.api = falcon.API(middleware=[cors.middleware])
         self.api.add_route(route, self.resource)
-
 
     @raises(ValueError)
     def test_init_settings(self):
@@ -63,7 +62,8 @@ class TestCors(testing.TestBase):
             method = kwargs.pop('method', 'GET')
 
         self.simulate_cors_api(cors, route)
-        self.simulate_request(route, method=method, **kwargs)
+        result = testing.simulate_request(self.api, method=method, **kwargs)
+        return result
 
     def test_cors_disabled(self):
         self.resource = mock.MagicMock()
@@ -71,16 +71,16 @@ class TestCors(testing.TestBase):
         cors = CORS()
         cors.process = mock.Mock()
         self.simulate_cors_api(cors, '/')
-        self.simulate_request('/', method='POST')
+        self.simulate_request(path='/', method='POST')
         self.assertEquals(cors.process.call_count, 0)
 
     def simulate_all_origins(self, preflight=False):
         cors_config = CORS(allow_all_origins=True, allow_methods_list=['PATCH'])
         origin = self.get_rand_str()
         headers = [('origin', origin)]
-        self.simulate_cors_request(cors_config, headers=headers, preflight=preflight)
-        self.assertEqual(self.get_header('access-control-allow-origin'), '*')
-        self.assertEqual(self.get_header('access-control-allow-credentials'), None)
+        result = self.simulate_cors_request(cors_config, headers=headers, preflight=preflight)
+        self.assertEqual(result.headers.get('access-control-allow-origin'), '*')
+        self.assertEqual(result.headers.get('access-control-allow-credentials'), None)
 
     def test_all_origins(self):
         self.simulate_all_origins()
@@ -91,9 +91,9 @@ class TestCors(testing.TestBase):
                            allow_all_methods=True)
         origin = self.get_rand_str()
         headers = [('origin', origin)]
-        self.simulate_cors_request(cors_config, headers=headers, preflight=preflight)
-        self.assertEqual(self.get_header('access-control-allow-origin'), origin)
-        self.assertEqual(self.get_header('access-control-allow-credentials'), 'true')
+        result = self.simulate_cors_request(cors_config, headers=headers, preflight=preflight)
+        self.assertEqual(result.headers.get('access-control-allow-origin'), origin)
+        self.assertEqual(result.headers.get('access-control-allow-credentials'), 'true')
 
     def test_vary_origins_called(self):
         cors = CORS(allow_all_origins=True, allow_credentials_origins_list=['test.com'])
@@ -157,7 +157,6 @@ class TestCors(testing.TestBase):
         cors._process_credentials = mock.Mock()
         headers = [('origin', 'rackspace.com')]
         self.simulate_cors_request(cors, headers=headers, preflight=True)
-        # print(cors._process_methods.call_count)
         cors._process_credentials.assert_called_once_with(
             self.resource.req,
             self.resource.resp,
@@ -442,3 +441,15 @@ class TestCors(testing.TestBase):
         cors = CORS()
         cors._set_vary_origin(fake_resp)
         fake_resp.append_header.assert_called_once_with('vary', 'origin')
+
+    def test_static_route(self):
+        cors_config = CORS(allow_all_origins=True, allow_credentials_all_origins=True,
+                           allow_all_methods=True)
+        origin = self.get_rand_str()
+        headers = [('origin', origin)]
+        self.resource = CORSResource()
+        api = falcon.API(middleware=[cors_config.middleware])
+        api.add_static_route("/static", "/var/www/static")
+        result = testing.simulate_request(api, path="/static/image.png", method="GET", headers=headers)
+        self.assertEqual(result.headers.get('access-control-allow-origin'), origin)
+        self.assertEqual(result.headers.get('access-control-allow-credentials'), 'true')
