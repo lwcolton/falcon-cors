@@ -13,6 +13,7 @@ setup(
     package_dir = {"":"src"},
     packages = find_packages("src"),
     install_requires=["falcon"],
+    license="Apache 2.0",
     author = 'Colton Leekley-Winslow',
     author_email = 'lwcolton@gmail.com',
     url = 'https://github.com/lwcolton/falcon-cors',
