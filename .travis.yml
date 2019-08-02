@@ -1,7 +1,7 @@
 sudo: false
 dist: trusty
+language: python
 install:
-- python -m pip install --upgrade pip
 - pip install tox
 script:
 - tox
