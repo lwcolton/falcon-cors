@@ -4,7 +4,10 @@ This module implements the configuration for handling CORS requests.
 import logging
 import re
 
-from falcon import HTTP_METHODS
+try:
+    from falcon import HTTP_METHODS
+except ImportError:
+    from falcon import status_codes as HTTP_METHODS
 
 from .middleware import CORSMiddleware
 from .log import get_default_logger
