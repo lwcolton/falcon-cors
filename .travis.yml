@@ -2,7 +2,7 @@ language: python
 sudo: false
 dist: trusty
 install:
-- pip install --user tox
+- pip install tox
 script:
 - tox
 deploy:
