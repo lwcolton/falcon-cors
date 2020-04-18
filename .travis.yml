@@ -1,8 +1,7 @@
 sudo: false
 dist: trusty
 install:
-- pip install --upgrade pip
-- pip install tox
+- pip install --user tox
 script:
 - tox
 deploy:
