@@ -15,3 +15,10 @@ class CORSMiddleware:
             return
         cors = getattr(resource, 'cors', self.cors)
         cors.process(req, resp, resource)
+
+    
+    def process_response(self, req, resp, resource, req_succeeded):
+        if req_succeeded:
+            return
+        cors = getattr(resource, 'cors', self.cors)
+        cors.process(req, resp, resource)
