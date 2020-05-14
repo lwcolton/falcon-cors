@@ -7,25 +7,31 @@ from nose.tools import raises
 import falcon
 from falcon_cors import CORS
 import falcon.testing as testing
-from falcon.testing.resource import TestResource
+from falcon.testing import SimpleTestResource
 
 
-class CORSResource(TestResource):
+class CORSResource(SimpleTestResource):
+    @falcon.before(testing.capture_responder_args)
+    @falcon.before(testing.set_resp_defaults)
+    def on_patch(self, req, resp, **kwargs):
+        pass
+
+    @falcon.before(testing.capture_responder_args)
+    @falcon.before(testing.set_resp_defaults)
     def on_options(self, req, resp, **kwargs):
-        self.req, self.resp, self.kwargs = req, resp, kwargs
+        pass
 
 
-class TestCors(testing.TestBase):
+class TestCors(testing.TestCase):
     def get_header(self, name):
-        return self.resource.resp._headers.get(name.lower(), None)
+        return self.resource.captured_resp._headers.get(name.lower(), None)
 
     def get_rand_str(self):
         return str(uuid.uuid4())
 
     def simulate_cors_api(self, cors, route='/'):
-        self.api = falcon.API(middleware=[cors.middleware])
-        self.api.add_route(route, self.resource)
-
+        self.app = falcon.API(middleware=[cors.middleware])
+        self.app.add_route(route, self.resource)
 
     @raises(ValueError)
     def test_init_settings(self):
@@ -55,15 +61,15 @@ class TestCors(testing.TestBase):
                               preflight_method='PATCH', add_request_method=True, **kwargs):
         self.resource = CORSResource()
         if preflight:
-            kwargs.setdefault('headers', [])
+            headers = kwargs.setdefault('headers', {})
             if add_request_method:
-                kwargs['headers'].append(('access-control-request-method', preflight_method))
+                headers['access-control-request-method'] = preflight_method
             method = 'OPTIONS'
         else:
             method = kwargs.pop('method', 'GET')
 
         self.simulate_cors_api(cors, route)
-        self.simulate_request(route, method=method, **kwargs)
+        self.simulate_request(method, route, **kwargs)
 
     def test_cors_disabled(self):
         self.resource = mock.MagicMock()
@@ -71,13 +77,13 @@ class TestCors(testing.TestBase):
         cors = CORS()
         cors.process = mock.Mock()
         self.simulate_cors_api(cors, '/')
-        self.simulate_request('/', method='POST')
+        self.simulate_request('POST', '/')
         self.assertEquals(cors.process.call_count, 0)
 
     def simulate_all_origins(self, preflight=False):
         cors_config = CORS(allow_all_origins=True, allow_methods_list=['PATCH'])
         origin = self.get_rand_str()
-        headers = [('origin', origin)]
+        headers = {'origin': origin}
         self.simulate_cors_request(cors_config, headers=headers, preflight=preflight)
         self.assertEqual(self.get_header('access-control-allow-origin'), '*')
         self.assertEqual(self.get_header('access-control-allow-credentials'), None)
@@ -90,7 +96,7 @@ class TestCors(testing.TestBase):
         cors_config = CORS(allow_all_origins=True, allow_credentials_all_origins=True,
                            allow_all_methods=True)
         origin = self.get_rand_str()
-        headers = [('origin', origin)]
+        headers = {'origin': origin}
         self.simulate_cors_request(cors_config, headers=headers, preflight=preflight)
         self.assertEqual(self.get_header('access-control-allow-origin'), origin)
         self.assertEqual(self.get_header('access-control-allow-credentials'), 'true')
@@ -99,9 +105,9 @@ class TestCors(testing.TestBase):
         cors = CORS(allow_all_origins=True, allow_credentials_origins_list=['test.com'])
         cors._set_vary_origin = mock.Mock()
         origin = self.get_rand_str()
-        headers = [('origin', origin)]
+        headers = {'origin': origin}
         self.simulate_cors_request(cors, headers=headers, preflight=False)
-        cors._set_vary_origin.assert_called_once_with(self.resource.resp)
+        cors._set_vary_origin.assert_called_once_with(self.resource.captured_resp)
 
     def test_no_origin_return(self):
         cors = CORS()
@@ -113,7 +119,7 @@ class TestCors(testing.TestBase):
         cors = CORS(allow_origins_list=['test.com'])
         cors._process_origin = mock.Mock(return_value=False)
         cors._process_credentials = mock.Mock()
-        headers = [('origin', 'rackspace.com')]
+        headers = {'origin': 'rackspace.com'}
         self.simulate_cors_request(cors, headers=headers, preflight=False)
         self.assertEqual(cors._process_origin.call_count, 1)
         self.assertEqual(cors._process_credentials.call_count, 0)
@@ -122,7 +128,7 @@ class TestCors(testing.TestBase):
         cors = CORS(allow_all_origins=True)
         cors._get_requested_headers = mock.Mock()
         cors._process_origin = mock.Mock(return_value=True)
-        headers = [('origin', 'rackspace.com')]
+        headers = {'origin': 'rackspace.com'}
         self.simulate_cors_request(cors, headers=headers,
                                    preflight=True, add_request_method=False)
         self.assertEqual(cors._process_origin.call_count, 1)
@@ -132,7 +138,7 @@ class TestCors(testing.TestBase):
         cors = CORS(allow_all_origins=True, allow_methods_list=['GET'])
         cors._get_requested_headers = mock.Mock(return_value=True)
         cors._process_allow_headers = mock.Mock()
-        headers = [('origin', 'rackspace.com')]
+        headers = {'origin': 'rackspace.com'}
         self.simulate_cors_request(cors, headers=headers,
                                    preflight=True, preflight_method='POST')
         self.assertEqual(cors._get_requested_headers.call_count, 1)
@@ -143,10 +149,10 @@ class TestCors(testing.TestBase):
                     allow_headers_list=['test_header'])
         cors._process_methods = mock.Mock(return_value=True)
         cors._process_credentials = mock.Mock()
-        headers = [
-            ('origin', 'rackspace.com'),
-            ('access-control-request-headers', 'not_allowed_header')
-        ]
+        headers = {
+            'origin': 'rackspace.com',
+            'access-control-request-headers': 'not_allowed_header',
+        }
         self.simulate_cors_request(cors, headers=headers, preflight=True)
         self.assertEqual(cors._process_methods.call_count, 1)
         self.assertEqual(cors._process_credentials.call_count, 0)
@@ -155,12 +161,12 @@ class TestCors(testing.TestBase):
         cors = CORS(allow_all_origins=True, allow_all_methods=True, allow_all_headers=True)
         cors._process_methods = mock.Mock(return_value=True)
         cors._process_credentials = mock.Mock()
-        headers = [('origin', 'rackspace.com')]
+        headers = {'origin': 'rackspace.com'}
         self.simulate_cors_request(cors, headers=headers, preflight=True)
         # print(cors._process_methods.call_count)
         cors._process_credentials.assert_called_once_with(
-            self.resource.req,
-            self.resource.resp,
+            self.resource.captured_req,
+            self.resource.captured_resp,
             'rackspace.com'
         )
 
