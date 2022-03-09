@@ -17,6 +17,7 @@ setup(
     author_email = 'lwcolton@gmail.com',
     url = 'https://github.com/lwcolton/falcon-cors',
     download_url = 'https://github.com/lwcolton/falcon-cors/archive/master.zip',
+    license = 'Apache 2.0',
     keywords = ['falcon', 'cors', 'http'],
     classifiers = []
 )
